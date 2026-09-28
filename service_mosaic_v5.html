@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Service Mosaic — Atomic Services + Competitor Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE0;
+    --card:#F5F3EB;
+    --grout:#37332B;
+    --ink:#2B2823;
+    --ink-soft:#6B6559;
+
+    --mon-tint:#DCE3EC; --mon-deep:#2F4F7A;
+    --sim-tint:#EFDFC6; --sim-deep:#B4711E;
+    --mat-tint:#E1E6CC; --mat-deep:#5E6E32;
+    --psy-tint:#EFDADA; --psy-deep:#A6403F;
+    --adv-tint:#E1D8E8; --adv-deep:#5B4479;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    padding:56px 24px 90px;
+  }
+
+  .wrap{max-width:1160px;margin:0 auto;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:2px solid var(--grout);
+    padding-bottom:22px;
+    margin-bottom:8px;
+    gap:24px;
+    flex-wrap:wrap;
+  }
+  .eyebrow{
+    font-size:13px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Shippori Mincho',serif;
+    font-weight:700;
+    font-size:44px;
+    margin:0;
+    line-height:1.05;
+  }
+  .kanji-mark{
+    font-family:'Shippori Mincho',serif;
+    font-size:56px;
+    line-height:1;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .kanji-mark span{
+    display:block;
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:12px;
+    letter-spacing:.1em;
+    margin-top:6px;
+    color:var(--ink-soft);
+  }
+  .lede{
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:700px;
+    margin:22px 0 30px;
+    line-height:1.6;
+  }
+  .lede strong{color:var(--ink);}
+
+  nav.tabs{
+    display:flex;
+    gap:2px;
+    margin-bottom:36px;
+    border-bottom:1px solid var(--ink-soft);
+  }
+  nav.tabs button{
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    letter-spacing:.03em;
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    padding:10px 18px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    margin-bottom:-1px;
+  }
+  nav.tabs button.active{
+    color:var(--ink);
+    border-bottom-color:var(--grout);
+  }
+
+  section.category{margin-bottom:44px;}
+
+  .cat-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .cat-kanji{
+    font-family:'Shippori Mincho',serif;
+    font-size:22px;
+  }
+  .cat-name{
+    font-family:'Shippori Mincho',serif;
+    font-size:20px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .cat-q{
+    font-size:13px;
+    color:var(--ink-soft);
+    padding-left:8px;
+    border-left:1px solid var(--ink-soft);
+  }
+
+  .tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(128px,1fr));
+    gap:3px;
+    background:var(--grout);
+    padding:3px;
+    border:2px solid var(--grout);
+  }
+
+  .tile{
+    background:var(--cat-tint);
+    aspect-ratio:1/1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:10px 6px;
+    position:relative;
+    cursor:default;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .tile:hover{
+    transform:scale(1.045);
+    box-shadow:0 6px 16px rgba(0,0,0,.2);
+    z-index:20;
+  }
+  .tile svg{
+    width:30px;
+    height:30px;
+    stroke:var(--cat-deep);
+    fill:none;
+    stroke-width:1.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .tile .name{
+    font-size:12.5px;
+    font-weight:500;
+    text-align:center;
+    line-height:1.25;
+    color:var(--cat-deep);
+  }
+
+  .info{
+    position:absolute;
+    bottom:calc(100% + 10px);
+    left:50%;
+    transform:translateX(-50%) translateY(4px);
+    width:198px;
+    background:var(--ink);
+    color:var(--paper);
+    padding:12px 13px 11px;
+    border-radius:3px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+    text-align:left;
+    z-index:30;
+  }
+  .info::after{
+    content:"";
+    position:absolute;
+    top:100%;
+    left:50%;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:var(--ink);
+  }
+  .tile:hover .info{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+  .info .outcome{
+    font-size:11.5px;
+    font-style:italic;
+    color:#C9C4B6;
+    line-height:1.4;
+    margin-bottom:9px;
+    padding-bottom:9px;
+    border-bottom:1px solid #4E493D;
+  }
+  .info .comp-label{
+    font-size:9.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#8F897A;
+    margin-bottom:4px;
+  }
+  .info .comp-name{
+    font-family:'Shippori Mincho',serif;
+    font-size:14px;
+    font-weight:700;
+    color:var(--paper);
+  }
+  .info .comp-country{
+    font-size:10.5px;
+    color:#C9C4B6;
+    font-weight:500;
+  }
+  .info .comp-rev{
+    font-size:11px;
+    color:#D8D4C8;
+    line-height:1.4;
+    margin-top:4px;
+  }
+  .info .comp-rev b{color:var(--paper);font-weight:500;}
+
+  .mon .tiles{--cat-tint:var(--mon-tint);--cat-deep:var(--mon-deep);}
+  .sim .tiles{--cat-tint:var(--sim-tint);--cat-deep:var(--sim-deep);}
+  .mat .tiles{--cat-tint:var(--mat-tint);--cat-deep:var(--mat-deep);}
+  .psy .tiles{--cat-tint:var(--psy-tint);--cat-deep:var(--psy-deep);}
+  .adv .tiles{--cat-tint:var(--adv-tint);--cat-deep:var(--adv-deep);}
+  .mon .cat-kanji{color:var(--mon-deep);}
+  .sim .cat-kanji{color:var(--sim-deep);}
+  .mat .cat-kanji{color:var(--mat-deep);}
+  .psy .cat-kanji{color:var(--psy-deep);}
+  .adv .cat-kanji{color:var(--adv-deep);}
+
+  /* competitor analysis tab */
+  .region-key{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom:28px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .region-key span{display:flex;align-items:center;gap:6px;}
+  .region-key i{width:10px;height:10px;display:inline-block;border-radius:50%;}
+
+  .dossier-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+    gap:16px;
+  }
+
+  .dossier{
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    border-left:5px solid var(--region);
+    padding:16px 18px 15px;
+  }
+  .dossier .d-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid #D8D4C6;
+  }
+  .dossier .d-name{
+    font-family:'Shippori Mincho',serif;
+    font-weight:700;
+    font-size:17px;
+  }
+  .dossier .d-country{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .dossier .d-status{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    white-space:nowrap;
+    border:1px solid currentColor;
+    font-weight:500;
+  }
+  .status-active{color:var(--mat-deep);}
+  .status-shutdown{color:var(--psy-deep);}
+  .status-acquired{color:var(--adv-deep);}
+  .status-public{color:var(--mon-deep);}
+
+  .dossier dl{margin:0;}
+  .dossier .row{
+    display:grid;
+    grid-template-columns:96px 1fr;
+    gap:10px;
+    padding:6px 0;
+    border-bottom:1px dotted #D8D4C6;
+  }
+  .dossier .row:last-child{border-bottom:none;}
+  .dossier dt{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding-top:1px;
+  }
+  .dossier dd{
+    margin:0;
+    font-size:12.5px;
+    line-height:1.5;
+  }
+  .dossier .jp-flag{
+    font-weight:500;
+  }
+  .jp-white-space{color:var(--sim-deep);}
+  .jp-native{color:var(--ink-soft);}
+  .jp-heavy{color:var(--psy-deep);}
+
+  /* tier 0 inputs tab */
+  .caveat-box{
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    border-left:5px solid var(--psy-deep);
+    padding:16px 18px;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--ink);
+    margin-bottom:32px;
+  }
+  .caveat-box b{color:var(--psy-deep);}
+
+  .brightline{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2px;
+    background:var(--grout);
+    border:2px solid var(--grout);
+    margin-bottom:36px;
+  }
+  .brightline > div{
+    background:var(--card);
+    padding:18px 20px;
+  }
+  .brightline h4{
+    font-family:'Shippori Mincho',serif;
+    font-size:15px;
+    margin:0 0 8px;
+  }
+  .brightline .ok h4{color:var(--mat-deep);}
+  .brightline .no h4{color:var(--psy-deep);}
+  .brightline p{font-size:12.5px;line-height:1.55;color:var(--ink-soft);margin:0;}
+  @media(max-width:640px){.brightline{grid-template-columns:1fr;}}
+
+  .input-group{margin-bottom:34px;}
+  .input-group .cat-head{margin-bottom:10px;}
+  table.input-table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    font-size:12.5px;
+  }
+  table.input-table th{
+    text-align:left;
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:500;
+    padding:9px 12px;
+    border-bottom:1px solid #D8D4C6;
+  }
+  table.input-table td{
+    padding:10px 12px;
+    border-bottom:1px solid #E6E2D5;
+    vertical-align:top;
+    line-height:1.5;
+  }
+  table.input-table tr:last-child td{border-bottom:none;}
+  table.input-table td.col-input{font-weight:500;white-space:nowrap;}
+  table.input-table td.col-status{white-space:nowrap;}
+  .badge-clear,.badge-grey{
+    display:inline-block;
+    font-size:10px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border:1px solid currentColor;
+    font-weight:500;
+  }
+  .badge-clear{color:var(--mat-deep);}
+  .badge-grey{color:var(--sim-deep);}
+  .grey-note{display:block;font-size:11px;color:var(--ink-soft);margin-top:4px;font-style:italic;}
+
+  .strategy-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+    margin-bottom:36px;
+  }
+  .strategy-list .s-card{
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    border-top:3px solid var(--mon-deep);
+    padding:14px 16px;
+  }
+  .strategy-list .s-card h5{
+    font-family:'Shippori Mincho',serif;
+    font-size:13.5px;
+    margin:0 0 6px;
+  }
+  .strategy-list .s-card p{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:0;}
+
+  .tech-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:36px;
+  }
+  .tech-tags .tag{
+    background:var(--adv-tint);
+    color:var(--adv-deep);
+    font-size:12px;
+    padding:6px 12px;
+    border:1px solid var(--adv-deep);
+  }
+  .tech-tags .tag small{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px;font-weight:400;}
+
+  .tier1-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:14px;
+  }
+  .tier1-card{
+    background:#E9E5D8;
+    border:1px dashed #B8B2A0;
+    padding:14px 16px;
+    position:relative;
+    opacity:.88;
+  }
+  .tier1-card .lock{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--psy-deep);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .tier1-card h5{
+    font-family:'Shippori Mincho',serif;
+    font-size:13.5px;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .tier1-card p{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:0;}
+
+  /* revenue models tab */
+  .rev-diagram{
+    width:100%;
+    height:auto;
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    margin-bottom:32px;
+    padding:10px 0 4px;
+  }
+  .rev-legend{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom:36px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .rev-legend span{display:flex;align-items:center;gap:6px;}
+  .rev-legend i{width:10px;height:10px;display:inline-block;border-radius:50%;}
+
+  .revmodel-card{
+    background:var(--card);
+    border:1px solid #D8D4C6;
+    border-left:5px solid var(--rev-deep);
+    padding:16px 18px 15px;
+    margin-bottom:16px;
+  }
+  .revmodel-card .rm-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    margin-bottom:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid #D8D4C6;
+  }
+  .revmodel-card .rm-name{
+    font-family:'Shippori Mincho',serif;
+    font-weight:700;
+    font-size:17px;
+  }
+  .revmodel-card .rm-tier{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border:1px solid var(--rev-deep);
+    color:var(--rev-deep);
+    white-space:nowrap;
+  }
+  .revmodel-card .row{
+    display:grid;
+    grid-template-columns:130px 1fr;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px dotted #D8D4C6;
+  }
+  .revmodel-card .row:last-of-type{border-bottom:none;}
+  .revmodel-card dt{
+    font-size:10px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding-top:1px;
+  }
+  .revmodel-card dd{
+    margin:0;
+    font-size:12.5px;
+    line-height:1.55;
+  }
+  .path-chain{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+  }
+  .path-chain .step{
+    background:var(--paper);
+    border:1px solid #D8D4C6;
+    padding:4px 9px;
+    white-space:nowrap;
+  }
+  .path-chain .arrow{color:var(--ink-soft);}
+  .case-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+  .case-chips .chip{
+    font-family:'Shippori Mincho',serif;
+    font-size:12px;
+    font-weight:700;
+    background:var(--rev-tint);
+    color:var(--rev-deep);
+    padding:4px 10px;
+    border:1px solid var(--rev-deep);
+  }
+
+  .rm-sub .rm-name{color:var(--mat-deep);}
+  .rm-aum .rm-name{color:var(--psy-deep);}
+  .rm-funnel .rm-name{color:var(--adv-deep);}
+  .rm-txn .rm-name{color:var(--mat-deep);}
+  .rm-placement .rm-name{color:var(--mat-deep);}
+  .rm-b2b .rm-name{color:var(--adv-deep);}
+  .rm-lending .rm-name{color:var(--psy-deep);}
+  .rm-card .rm-name{color:var(--adv-deep);}
+
+  footer{
+    margin-top:40px;
+    padding-top:18px;
+    border-top:1px solid var(--ink-soft);
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    max-width:1160px;
+  }
+
+  @media(max-width:640px){
+    h1{font-size:32px;}
+    .kanji-mark{font-size:36px;}
+    .info{width:172px;}
+    .dossier .row{grid-template-columns:1fr;gap:2px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Fintech app · service architecture</p>
+      <h1>Service Mosaic</h1>
+    </div>
+    <div class="kanji-mark">素材<span>atomic services + landscape</span></div>
+  </header>
+
+  <p class="lede">Twenty-four irreducible units of decision support, and the companies already occupying — or leaving open — each part of the map.</p>
+
+  <nav class="tabs">
+    <button class="active" data-tab="mosaic" onclick="showTab('mosaic', this)">Mosaic</button>
+    <button data-tab="competitors" onclick="showTab('competitors', this)">Competitor analysis</button>
+    <button data-tab="inputs" onclick="showTab('inputs', this)">Tier 0 inputs</button>
+    <button data-tab="revenue" onclick="showTab('revenue', this)">Revenue models</button>
+  </nav>
+
+  <div id="tab-mosaic">
+
+  <section class="category mon">
+    <div class="cat-head">
+      <span class="cat-kanji">観測</span>
+      <span class="cat-name">Monitoring</span>
+      <span class="cat-q">answers: "where am I?"</span>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 12 L12 4"/><path d="M12 12 L18 16"/></svg>
+        <div class="name">Cash Flow</div>
+        <div class="info">
+          <div class="outcome">I understand my cash flow</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Monarch Money</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>subscription</b>, ~$100/yr</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><polyline points="3,17 9,11 13,15 21,5"/><polyline points="15,5 21,5 21,11"/></svg>
+        <div class="name">Net Worth</div>
+        <div class="info">
+          <div class="outcome">I know my financial position</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Empower Personal Dashboard</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>free tool</b> — lead gen for its paid wealth-management arm</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><text x="12" y="16.5" text-anchor="middle" font-size="11" stroke-width="1" font-family="Zen Kaku Gothic New">¥</text></svg>
+        <div class="name">Income</div>
+        <div class="info">
+          <div class="outcome">I know what I actually earn</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Money Forward ME</div>
+          <div class="comp-country">Japan</div>
+          <div class="comp-rev">Rev: <b>freemium</b> subscription + B2B accounting suite</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><rect x="5" y="10" width="4" height="9"/><rect x="14" y="6" width="4" height="13"/><line x1="2" y1="8" x2="22" y2="8" stroke-dasharray="2 2"/></svg>
+        <div class="name">Peer Check</div>
+        <div class="info">
+          <div class="outcome">I'm not alone, and I'm doing okay</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Frich</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>freemium</b>, early-stage — ad and partnership revenue</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 3 L19 6 V11 C19 16 16 19 12 21 C8 19 5 16 5 11 V6 Z"/><polyline points="9,12 11,14 15,9"/></svg>
+        <div class="name">Coverage Audit</div>
+        <div class="info">
+          <div class="outcome">I know what I'm already covered for</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Canopy Connect</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>B2B API</b> licensing — sold to other fintechs, not consumers directly</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category sim">
+    <div class="cat-head">
+      <span class="cat-kanji">試算</span>
+      <span class="cat-name">Simulation</span>
+      <span class="cat-q">answers: "what if?"</span>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 3 V10"/><path d="M12 10 L6 20"/><path d="M12 10 L18 20"/><circle cx="12" cy="3" r="1.3" fill="currentColor"/></svg>
+        <div class="name">Life Events</div>
+        <div class="info">
+          <div class="outcome">I know the financial shape of my life decisions</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Ellevest</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>subscription</b> tiers, $12–$97/mo</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><polyline points="2,15 6,11 10,17 14,7 18,14 22,9"/></svg>
+        <div class="name">Stress Test</div>
+        <div class="info">
+          <div class="outcome">I know my financial resilience</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Origin</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>B2B</b> — sold as an employer benefit, not direct to consumer</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M6 3 H18 L12 12 L18 21 H6 L12 12 Z"/></svg>
+        <div class="name">Retirement</div>
+        <div class="info">
+          <div class="outcome">I know if my plan works</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Boldin</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>freemium</b> subscription, ~$120/yr for full planner</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M4 11 L12 4 L20 11 V20 H4 Z"/><line x1="10" y1="20" x2="10" y2="14"/><line x1="10" y1="14" x2="14" y2="14"/><line x1="14" y1="14" x2="14" y2="20"/></svg>
+        <div class="name">Housing</div>
+        <div class="info">
+          <div class="outcome">I know if this house makes sense</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Better</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>origination fees</b> once the simulator converts to a loan</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="19" x2="19" y2="5"/><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="17" r="2.4"/></svg>
+        <div class="name">Loan Payoff</div>
+        <div class="info">
+          <div class="outcome">I know the true cost of borrowing</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Tally <em>(shut down 2024)</em></div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>interest spread</b> on its own credit line — see Competitor analysis tab</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="14" height="18" rx="2"/><circle cx="11" cy="10" r="3"/><line x1="7" y1="17" x2="15" y2="17"/></svg>
+        <div class="name">Visa &amp; Tax</div>
+        <div class="info">
+          <div class="outcome">I know the financial shape of working here as a foreigner</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">— no direct consumer app —</div>
+          <div class="comp-country">n/a</div>
+          <div class="comp-rev">Adjacent: immigration lawyers &amp; accountant marketplaces, fee-per-case. This is genuine white space.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category mat">
+    <div class="cat-head">
+      <span class="cat-kanji">照合</span>
+      <span class="cat-name">Matching</span>
+      <span class="cat-q">answers: "what should I use?"</span>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="13" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <div class="name">Best Card</div>
+        <div class="info">
+          <div class="outcome">I'm using the optimal card</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">NerdWallet</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>affiliate commissions</b> from card issuers per approved application</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M6 3 L11 5 V10 C11 14 8.5 16.5 6 18 C3.5 16.5 1 14 1 10 V5 Z" transform="translate(3,0)"/><path d="M17 5 L21 6.5 V10.5 C21 13.5 19 15.5 17 16.8 C15 15.5 13 13.5 13 10.5 V6.5 Z"/></svg>
+        <div class="name">Insurance Match</div>
+        <div class="info">
+          <div class="outcome">I'm paying the right premium for the right coverage</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Policygenius</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>commission</b> per policy sold through the platform</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M4 10 L12 4 L20 10 Z"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="6" y1="10" x2="6" y2="18"/><line x1="12" y1="10" x2="12" y2="18"/><line x1="18" y1="10" x2="18" y2="18"/><line x1="4" y1="19" x2="20" y2="19"/></svg>
+        <div class="name">Loan Match</div>
+        <div class="info">
+          <div class="outcome">I know which lender is cheapest</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">LendingTree</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>referral fees</b> from lenders per matched inquiry</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17"/><rect x="8" y="7" width="2.5" height="2.5"/><rect x="13.5" y="7" width="2.5" height="2.5"/><rect x="8" y="11.5" width="2.5" height="2.5"/><rect x="13.5" y="11.5" width="2.5" height="2.5"/></svg>
+        <div class="name">Bank Match</div>
+        <div class="info">
+          <div class="outcome">My bank isn't charging me to exist</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Bankrate</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>advertising &amp; referral</b> fees from listed banks</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M3 13 L9 13 L12 16 L15 13 L21 13"/><path d="M9 13 L9 8"/><path d="M15 13 L15 8"/></svg>
+        <div class="name">Find a Pro</div>
+        <div class="info">
+          <div class="outcome">I have professional help</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Harness Wealth</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>placement fees</b> from matched CPAs and advisors</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category psy">
+    <div class="cat-head">
+      <span class="cat-kanji">心理</span>
+      <span class="cat-name">Psychology</span>
+      <span class="cat-q">answers: "how do I feel about money?"</span>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 3 C7 3 4 7 4 12 C4 17 7 21 12 21 C17 21 20 17 20 12 C20 7 17 3 12 3 Z"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M8.5 16 Q12 18.6 15.5 16"/></svg>
+        <div class="name">Money Archetype</div>
+        <div class="info">
+          <div class="outcome">I understand why I spend the way I do</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Cleo</div>
+          <div class="comp-country">UK / United States</div>
+          <div class="comp-rev">Rev: <b>freemium</b> subscription, ~$6–8/mo</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M4 5 H20 V15 H10 L6 19 V15 H4 Z"/><circle cx="9" cy="10" r="0.9" fill="currentColor"/><circle cx="12" cy="10" r="0.9" fill="currentColor"/><circle cx="15" cy="10" r="0.9" fill="currentColor"/></svg>
+        <div class="name">Reflect</div>
+        <div class="info">
+          <div class="outcome">I feel understood; I want to change</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Albert</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>pay-what-you-want</b> subscription + AUM fee on managed savings</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 3 L14.3 9 L21 9.4 L15.9 13.5 L17.6 20 L12 16.3 L6.4 20 L8.1 13.5 L3 9.4 L9.7 9 Z"/></svg>
+        <div class="name">Save &amp; Win</div>
+        <div class="info">
+          <div class="outcome">Saving feels like a game I'm winning</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Qapital</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>subscription</b> tiers, $3–12/mo</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M2 5 H12 V12 H7 L4 15 V12 H2 Z"/><path d="M10 9 H21 V15.5 H16 L18.7 18.3 V15.5 H10 Z"/></svg>
+        <div class="name">Talk Money</div>
+        <div class="info">
+          <div class="outcome">We can talk about money without fighting</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Zeta <em>(acquired by Acorns, 2025)</em></div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>freemium</b> subscription + financial-product partnerships</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 3 C9.3 3 8 6 8 9 C8 13 6 14 6 16 H18 C18 14 16 13 16 9 C16 6 14.7 3 12 3 Z"/><path d="M9.8 18.3 Q12 21 14.2 18.3"/></svg>
+        <div class="name">Gentle Nudge</div>
+        <div class="info">
+          <div class="outcome">I feel gently guided, not shamed</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Digit <em>(now Oportun)</em></div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>subscription</b>, ~$5/mo, bundled into Oportun</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="category adv">
+    <div class="cat-head">
+      <span class="cat-kanji">助言</span>
+      <span class="cat-name">Advisory</span>
+      <span class="cat-q">answers: "what should I do?"</span>
+    </div>
+    <div class="tiles">
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg>
+        <div class="name">Fund Match</div>
+        <div class="info">
+          <div class="outcome">I know what to invest in</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">WealthNavi</div>
+          <div class="comp-country">Japan</div>
+          <div class="comp-rev">Rev: <b>AUM fee</b>, ~1%/yr on managed assets</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M6 3 H15 L19 7 V21 H6 Z"/><path d="M15 3 V7 H19"/><line x1="9" y1="12" x2="16" y2="12"/><line x1="9" y1="15" x2="16" y2="15"/><circle cx="9.5" cy="18.5" r="1.4"/></svg>
+        <div class="name">Tax Plan</div>
+        <div class="info">
+          <div class="outcome">I'm minimizing tax efficiently</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">freee</div>
+          <div class="comp-country">Japan</div>
+          <div class="comp-rev">Rev: <b>SaaS subscription</b> for accounting &amp; tax filing</div>
+        </div>
+      </div>
+
+      <div class="tile">
+        <svg viewBox="0 0 24 24"><path d="M12 21 V13"/><path d="M12 13 L8 9"/><path d="M12 13 L16 9"/><path d="M12 9 V5"/><circle cx="12" cy="4" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="16" cy="8" r="1.3" fill="currentColor"/></svg>
+        <div class="name">Wealth Plan</div>
+        <div class="info">
+          <div class="outcome">I have a coherent financial plan</div>
+          <div class="comp-label">comparable</div>
+          <div class="comp-name">Facet</div>
+          <div class="comp-country">United States</div>
+          <div class="comp-rev">Rev: <b>flat annual fee</b>, not AUM-based</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  </div>
+
+  <div id="tab-competitors" style="display:none">
+
+    <p class="lede" style="margin-top:0;">Twenty-three companies mapped against your service mosaic — the gap each one is filling, what they shipped before they had any license, what they had to become once regulators noticed, and where they haven't reached Japan yet.</p>
+
+    <div class="region-key">
+      <span><i style="background:var(--mon-deep);"></i>United States</span>
+      <span><i style="background:var(--sim-deep);"></i>Japan</span>
+      <span><i style="background:var(--mat-deep);"></i>UK / multi-market</span>
+      <span style="margin-left:auto;">Status: <span class="status-active">active</span> · <span class="status-public">public</span> · <span class="status-acquired">acquired</span> · <span class="status-shutdown">shut down</span></span>
+    </div>
+
+    <div class="dossier-grid">
+
+      <div class="dossier" style="--region:var(--mat-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Cleo</div><div class="d-country">UK-incorporated, ~99.8% revenue from US</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Shame-free money talk for a generation that found dashboards cold and technical.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free chatbot that "roasts" your spending — a conversational layer over read-only bank data, no license required.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Subscription AI assistant + cash advances + credit-builder card. The cash-advance product triggered a $17M FTC settlement (2025) over speed/amount disclosures — it now carries consumer-lending compliance obligations.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. The chat/persona layer is Tier 0 and low-barrier; the lending side would need Money Lending Business registration.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$175M total. Series C $80M (2022) at $500M valuation. Balderton Capital, LocalGlobe, EQT Ventures, Sofina, Brevan Howard Digital.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Character-first chat UI; sassy, opinionated tone as the entire differentiator from clinical dashboards.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Persona tone (sassy vs. supportive) adapts to what the user says they want.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Qapital</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Turns saving into a game via "If This, Then That" rules instead of a static budget.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free round-up/rule-based micro-savings on top of a partner bank account.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Tiered subscription ($3–12/mo) + debit interchange + a robo-invest add-on (Qapital Invest).</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. The rules engine is Tier 0 if paired with an e-money wallet; the debit card needs a bank/funds-transfer partner.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$52–55M total. Northzone, Industrifonden, Anthemis Group, Swedbank Robur.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Playful "rules" builder — IFTTT-style triggers (it rains, you hit the gym) are the signature hook.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Users author their own idiosyncratic save-triggers.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Monarch Money</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Filled the hole Mint's 2024 shutdown left for a comprehensive, ad-free net-worth dashboard.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free-trial subscription budgeting/net-worth app — no lending or advice attached.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Subscription-only (~$99/yr). Added household collaboration and goal tracking; no new regulatory tier crossed.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. Aggregation via live bank APIs would need Japan's electronic settlement agency registration.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$95M total. Series B $75M (May 2025) at $850M valuation — FPV Ventures &amp; Forerunner Ventures (co-lead), Menlo Ventures, Accel, SignalFire, Clocktower.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Dense, spreadsheet-like dashboard for power users; founder was an early Mint product manager.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None — deliberately generalized rather than niche-tailored.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Copilot Money</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Another Mint-replacement, aimed at Apple-ecosystem users who want AI categorization with minimal manual cleanup.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free-trial iOS-only budgeting app.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Subscription ~$95/yr, AI auto-categorization; same low regulatory tier as Monarch.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present — same aggregation-license question as Monarch.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Not fully disclosed publicly; reported as lean relative to Monarch — treat as approximate.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Native-feeling, minimal, Apple Human Interface polish as the entire differentiator.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Digit</div><div class="d-country">United States</div></div>
+          <div class="d-status status-acquired">acquired</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Automated, "invisible" saving for people who found budgeting apps tedious.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free algorithmic auto-save tool, read-only linked to checking — no license needed at launch.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Acquired by Oportun (~$213–238M, 2021–22); now a $5/mo feature inside Oportun's licensed lending/neobank platform ("Set &amp; Save"), no longer a standalone app.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. The core "safe-to-save" algorithm is Tier 0 on its own; bundling with lending is what pulled it into heavier licensing.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Raised over $60M independently before acquisition.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Zero user-set rules — "you do nothing" was the entire pitch, the opposite bet from Qapital.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Save amounts are algorithmically personalized to real cash-flow pattern, with zero user configuration.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--psy-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Tally</div><div class="d-country">United States</div></div>
+          <div class="d-status status-shutdown">shut down</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Automated payoff of multiple credit cards via one lower-interest line of credit.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Consumer app <em>plus its own credit line from day one</em> — this made Tally a licensed lender at launch, unlike most others here.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Nothing. Pivoted to B2B white-label in April 2024, the named launch partner never materialized, shut down in August 2024.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">n/a — cautionary case, not a market-entry reference.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$172–200M total. Andreessen Horowitz (Series C lead), Kleiner Perkins, Shasta Ventures, Cowboy Ventures; Series D $80M (2022) at $855M valuation led by Sway Ventures.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Fully automated cross-card bill-pay — showed the downside of automation when the company itself disappears.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>The lesson is capital structure, not design: baking a lending license in from day one raised the burn rate and capital-dependency that ultimately killed it.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Zeta</div><div class="d-country">United States</div></div>
+          <div class="d-status status-acquired">acquired</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Shared-money tools built for couples/families, instead of a retrofitted individual joint account.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Joint card + joint account layered on users' existing banks via a partner-bank model, no new bank charter.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Announced a shutdown, then was acquired by Acorns instead (June 2025) — its 5th family-focused acquisition in two years, alongside GoHenry, PixPay, EarlyBird.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. A Tier 0 "shared visibility + prompts" layer needs no license; the joint account/card needs a banking partner.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Seed $1.5M (2019, Deciens Capital, Precursor), growing to a reported ~$50M+ across rounds. Acorns was an early investor before acquiring it outright.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Two-person UI — both partners see and annotate the same transaction.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Conversation prompts adapt to relationship stage (dating vs. married vs. parents).</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Empower</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Free net-worth dashboard as a lead-gen funnel into paid wealth management, rather than a subscription in itself.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free aggregation dashboard, launched as Personal Capital.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Free tool + fee-based (AUM %) hybrid human/robo advisory for accounts above ~$100k. Rebranded after Empower Retirement's 2020 acquisition.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present in this exact form. The free dashboard is Tier 0/1; the advisory arm needs FIEA registration.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Acquired; no longer independently funded at this stage.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Free-forever core tool — all monetization lives downstream, in advisory conversion.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None — same dashboard for everyone; segmentation happens in the sales funnel.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Frich</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Gen Z's "am I normal?" craving for peer comparison that older PFM tools never built.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free social app for anonymous peer spend-benchmarking — a social product, not a banking one, no financial license of any kind.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Still early-stage; freemium, exploring ad and partnership revenue.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not implemented — strong white-space flag. Tier 0, no banking partner required at all.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Early-stage; amount not fully disclosed publicly — treat as approximate.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Social-feed metaphor (closer to Strava than a dashboard).</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Comparisons segment by user-declared cohort — city, age band, income band.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Boldin</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>DIY retirement/life-scenario modeling for people who can't afford a human planner.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free/freemium public calculator, as NewRetirement — pure simulation, no license needed.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Subscription (~$120/yr) for the full multi-scenario planner; rebranded to Boldin in 2024.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present in this configurable form — genuine white space if paired with Japan-specific nenkin/tax data.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Not prominently disclosed; appears to be a smaller, long-running independent company — treat as approximate.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Leans into complexity rather than hiding it — a "financial spreadsheet in disguise."</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Fully user-editable assumptions (inflation, longevity, part-time work) rather than fixed defaults.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Origin</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>A financial-wellness benefit employers can offer instead of stitching together point solutions.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free-to-employee, B2B subscription sold to the employer — planning content and tools, Tier 0.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same model, expanded into estate planning and tax-filing add-ons.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. Genuine gap, though the real barrier is enterprise/HR sales cycles, not regulation.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Reported tens of millions from US VCs — figure not independently confirmed here, treat as approximate.</dd></div>
+        <div class="row"><dt>Design</dt><dd>B2B2C — the employee never sees a price tag; HR does.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Same content for every employee at a company; customization happens at the employer benefit-package level.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Facet</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Flat-fee human financial planning as an alternative to the AUM-percentage model that penalizes smaller portfolios.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Subscription-only human CFP planning from day one — required investment-advisory registration at launch, no low-reg precursor.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same core model, added tax and estate services.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-heavy">Not present — and genuinely regulation-heavy (Investment Advisory registration required in Japan too), not a low-barrier gap.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Over $100M raised — investors include Durable Capital Partners (approximate).</dd></div>
+        <div class="row"><dt>Design</dt><dd>Assigns each member a named human planner — "a relationship, not an app."</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Plans are built per-household by the assigned planner, not templated.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Harness Wealth</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Matching complex situations (equity comp, crypto, expats) to vetted CPAs/advisors instead of a cold directory search.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free matching/referral marketplace — not a licensed advisor itself, Tier 0.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same core model, added its own advisory arm for select services.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. Tier 0 referral marketplace is genuine white space — especially relevant to an expat/visa wedge.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Tens of millions raised from US VCs — figure approximate, not independently confirmed here.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Intake-quiz-to-match flow; positions itself as a concierge, not a search engine.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Matches are one-to-one based on a fairly detailed situational intake (equity type, residency, asset complexity).</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Albert</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Pairs an AI assistant with real human "Geniuses," for people who don't trust a chatbot alone with high-stakes decisions.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free budgeting + automated savings, Tier 0.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Pay-what-you-want subscription + human financial experts + its own savings/investing accounts — moved into Tier 1–2 as it added banking products.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present. The AI layer is low barrier; the banking/investing layer needs local partners.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Over $170M raised — investors include QED Investors and CapitalG (approximate).</dd></div>
+        <div class="row"><dt>Design</dt><dd>Pay-what-you-want pricing as a trust signal; hybrid AI+human is the core wedge.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Human Geniuses give genuinely individualized advice — one of the few here with true 1:1 customization.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Ellevest</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Investing/planning built around women's actual income and career curves, not male-average actuarial defaults.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Robo-advisor from launch — required investment-advisory registration immediately, similar to WealthNavi/THEO.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same core model plus coaching and workplace programs.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-heavy">Not present, and a heavy-regulation gap, not a low-barrier one — full FIEA registration required to replicate.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Over $155M raised — Rethink Impact, Morgan Stanley, Melinda French Gates among backers (approximate).</dd></div>
+        <div class="row"><dt>Design</dt><dd>The actuarial model itself is rebuilt around women's earnings curves, not a reskinned generic robo-advisor.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Return/risk projections are demographic-adjusted, not just individually risk-scored.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">NerdWallet</div><div class="d-country">United States</div></div>
+          <div class="d-status status-public">public</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Independent-feeling comparison content that ranks financial products, monetized invisibly through the reader.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free comparison content — a media/content company, not a financial institution, no license needed.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same model at scale, across cards, loans, insurance, banking. Public on Nasdaq (NRDS) since 2021.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Partially present in spirit (kakaku.com-style comparison sites exist) but no direct equivalent for English-speaking expats specifically.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Publicly traded; pre-IPO backers included IVP among others.</dd></div>
+        <div class="row"><dt>Design</dt><dd>SEO-and-content-led rather than app-led — the "product" is largely articles and calculators.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None — same rankings shown to every visitor.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Policygenius</div><div class="d-country">United States</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Comparing life/home/auto insurance without calling five separate agents.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free comparison quote engine — becoming a licensed insurance agency was required to actually bind policies.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Full brokerage — licensed insurance agency in all 50 US states.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present in this exact form. Insurance comparison exists in Japan, but a single cross-category broker built for expats is a gap.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Over $180M raised — Norwest Venture Partners, KKR, Susa Ventures among investors (approximate).</dd></div>
+        <div class="row"><dt>Design</dt><dd>Quote-comparison-first UX; revenue stays invisible to the user, paid by insurers.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None — same comparison logic applied to each user's stated profile.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--mon-deep);">
+        <div class="d-head">
+          <div><div class="d-name">LendingTree</div><div class="d-country">United States</div></div>
+          <div class="d-status status-public">public</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>The original "lenders compete for you" marketplace model, pioneered in the 1990s.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free-to-consumer loan-matching site — a marketplace, though lenders on the other side are regulated.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same model across mortgages, personal loans, credit cards, insurance. Public on Nasdaq (TREE) since 2008.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-white-space">Not present in this multi-lender-auction form.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Publicly traded since 2008, spun off from IAC/InterActiveCorp.</dd></div>
+        <div class="row"><dt>Design</dt><dd>The original "reverse-auction" UX for consumer credit — lenders bid, the borrower doesn't shop.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--sim-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Moneytree</div><div class="d-country">Japan</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Was the infrastructure gap itself — Japan's first FinTech to get an inbound API connection with a megabank (Mizuho), building the account-aggregation rails others (including Money Forward) rely on.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free consumer PFM app (2013), Tier 0.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Dual business — free consumer app + "Moneytree LINK," a B2B data-aggregation API now classified as a regulated Electronic Settlement Agency Business under Japan's amended Banking Act.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">Already Japan-native — included as the regulatory case study for what an institutional-grade Tier 1 aggregation business actually requires.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~¥3.1bn (~$29M) total. Mizuho Capital, SMBC Venture Capital, Sony Financial Ventures, Salesforce Ventures, SBI Investment, Digital Garage, Baillie Gifford.</dd></div>
+        <div class="row"><dt>Design</dt><dd>The consumer app is secondary; UX investment is concentrated in the developer-facing API/SDK, the real product.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None in the consumer app; the B2B side is configured per bank partner.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--sim-deep);">
+        <div class="d-head">
+          <div><div class="d-name">Money Forward</div><div class="d-country">Japan</div></div>
+          <div class="d-status status-public">public</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Consolidated the fragmented "one bank app per bank" experience Japanese users had before account aggregation existed.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free PFM app — Tier 0 at launch, later required registration as data flows became "live" and regulated.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Freemium consumer subscription + a much larger B2B accounting/payroll/tax SaaS business, now the majority of revenue. Public on TSE since 2017.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">Native — the primary domestic incumbent any Japan-market app in this doc would be positioned against.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Publicly traded; pre-IPO investors included Mitsubishi UFJ Capital and JAFCO among others.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Consumer app is a simple ledger view; most design investment now goes into the SME/enterprise accounting suite.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>None in consumer app; B2B side has industry-specific accounting templates.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--sim-deep);">
+        <div class="d-head">
+          <div><div class="d-name">WealthNavi</div><div class="d-country">Japan</div></div>
+          <div class="d-status status-public">public</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>First mass-market robo-advisor for Japan's famously cash-heavy, investment-shy household savings.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Launched directly as a licensed robo-advisor — Tier 2 from day one, no low-reg precursor.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same model at scale, ~¥1.3 trillion (~$8–9B) AUM. Now majority-owned by MUFG, which acquired a 51.46% stake for ~$668M in 2025.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">Native — the direct competitor to any "Fund Match" feature in this doc, already at massive scale and now bank-backed.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$70M raised pre-IPO — SBI, Sony Financial Ventures, Mizuho Capital, SMBC Venture Capital, Gree's Strive, UTokyo Innovation Platform. IPO'd Dec 2020 (~$173M raised, TSE: 7342).</dd></div>
+        <div class="row"><dt>Design</dt><dd>Five-question risk quiz to portfolio — radically simplified relative to a traditional brokerage account-opening flow.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Portfolio is individually risk-scored, but the underlying ETF menu is standardized, not bespoke.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--sim-deep);">
+        <div class="d-head">
+          <div><div class="d-name">THEO (Money Design)</div><div class="d-country">Japan</div></div>
+          <div class="d-status status-active">active</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Same robo-advisor gap as WealthNavi, distributed through regional-bank white-labeling instead of direct-to-consumer marketing.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Launched directly as a licensed robo-advisor, Tier 2 from day one — Money Design holds Investment Management Business + Investment Advisory licenses.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Same model, still positioned as Japan's AUM-leading independent robo-advisor.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">Native.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>~$107M total — mostly from regional banks (Yamaguchi Financial Group, Bank of Kyoto, Musashino Bank, Hyakugo Bank, Toho Bank) rather than typical VCs.</dd></div>
+        <div class="row"><dt>Design</dt><dd>White-label-friendly architecture so regional banks can skin it as their own product.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Portfolios drawn from a much larger ETF universe (thousands of ETFs, dozens of currencies) than most robo-advisors offer.</dd></div>
+      </div>
+
+      <div class="dossier" style="--region:var(--sim-deep);">
+        <div class="d-head">
+          <div><div class="d-name">freee</div><div class="d-country">Japan</div></div>
+          <div class="d-status status-public">public</div>
+        </div>
+        <div class="row"><dt>Gap</dt><dd>Cloud-based accounting/tax for small businesses and freelancers stuck with desktop software or paper.</dd></div>
+        <div class="row"><dt>Started as</dt><dd>Free-tier cloud bookkeeping tool, Tier 0–1.</dd></div>
+        <div class="row"><dt>Now / regs</dt><dd>Full SaaS suite — accounting, payroll, tax filing, HR — subscription-based. Public on TSE since 2019.</dd></div>
+        <div class="row"><dt>Japan</dt><dd class="jp-flag jp-native">Native — the direct comparable for any "Tax Plan" feature aimed at Japan.</dd></div>
+        <div class="row"><dt>Funding</dt><dd>Publicly traded since 2019 IPO.</dd></div>
+        <div class="row"><dt>Design</dt><dd>Built mobile/cloud-first, explicitly positioned against Yayoi, Japan's desktop-software incumbent.</dd></div>
+        <div class="row"><dt>Hyper-custom</dt><dd>Industry-specific templates (freelancer vs. corporation vs. specific business types).</dd></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="tab-inputs" style="display:none">
+
+    <p class="lede" style="margin-top:0;">What you can ask a user directly, by hand, with no live connection to a bank or broker — and what stays out of reach until you cross into Tier 1.</p>
+
+    <div class="caveat-box">
+      <b>Not legal advice.</b> This is a product-design map, not a compliance sign-off — built from the Tier 0–3 framework from earlier sessions (Tier 0: no registration · Tier 1: FSIBO / Electronic Settlement Agency registration for aggregation · Tier 2: FIEA investment-advisory registration · Tier 3: full investment-management licensing). Every "grey" item below needs a real read from Japanese fintech counsel before launch — the line between "user hands you a document" and "you're functionally aggregating their accounts" is a facts-and-circumstances judgment, not a bright statute.
+    </div>
+
+    <div class="brightline">
+      <div class="ok">
+        <h4>Generally Tier 0</h4>
+        <p>The user actively types, photographs, or uploads something themselves, in a single, user-initiated action. You never hold their bank credentials, never poll an account on a schedule, and never act on their behalf. You're a note-taking and calculating tool, not an access point.</p>
+      </div>
+      <div class="no">
+        <h4>Pushes you toward Tier 1</h4>
+        <p>You store credentials or an OAuth token and pull data on an ongoing basis without the user re-initiating each time; you present recurring uploads as a "connected" account; or you take any action on an account (transfer, cancellation) rather than just displaying what the user told you.</p>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--mon-deep);">属性</span><span class="cat-name">Identity &amp; demographics</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Age</td><td>Number field / dropdown</td><td>Near-zero</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Visa / residency status</td><td>Dropdown</td><td>Near-zero</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Family status (married, kids, dependents)</td><td>Form fields</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Employment type (FT, contract, freelance, owner)</td><td>Dropdown</td><td>Near-zero</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Nationality / home country</td><td>Dropdown</td><td>Near-zero</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--sim-deep);">収入</span><span class="cat-name">Income</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Monthly / annual salary</td><td>Typed text field</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Salary slip (給与明細)</td><td>Camera → OCR</td><td>Very low, high accuracy</td><td class="col-status"><span class="badge-clear">clear</span><span class="grey-note">Single user-initiated photo, not a live payroll feed.</span></td></tr>
+        <tr><td class="col-input">Withholding statement (源泉徴収票)</td><td>Camera / PDF upload → OCR</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Freelance / business income</td><td>Typed, self-reported</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Bonus amount + frequency</td><td>Typed text field</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--mat-deep);">支出</span><span class="cat-name">Spending</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Individual transaction (amount + category)</td><td>Quick-tap categories + text</td><td>High if logged live</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Receipt</td><td>Camera → OCR</td><td>Very low, high accuracy</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Recurring subscriptions (self-declared)</td><td>Chat / form ("I pay ¥1,490/mo for X")</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Rough budget by category</td><td>Slider / estimate field</td><td>Very low, lower accuracy</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--adv-deep);">資産</span><span class="cat-name">Assets &amp; debts</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Bank balance (typed estimate)</td><td>Text field ("about ¥X")</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Bank statement (self-exported PDF/CSV)</td><td>Document upload → parsing</td><td>Medium</td><td class="col-status"><span class="badge-grey">grey</span><span class="grey-note">A single, user-initiated export is far safer than credential-based pulling — but if it becomes an expected recurring monthly ritual, or you store login details to fetch it yourself, that starts to look like aggregation. State clearly in your ToS that the user exports and uploads manually each time.</span></td></tr>
+        <tr><td class="col-input">Investment account snapshot (NISA, iDeCo balances)</td><td>Typed text field</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Loan / debt details (type, balance, rate)</td><td>Form</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Credit card list (self-declared, not bureau-pulled)</td><td>Form</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--mon-deep);">保険</span><span class="cat-name">Insurance &amp; benefits</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Policy type + premium (typed)</td><td>Form</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Policy document (terms extraction)</td><td>Upload → OCR/parsing</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span><span class="grey-note">Single document the user chose to hand over — fine. Don't build a feature that "checks in" on the policy automatically.</span></td></tr>
+        <tr><td class="col-input">Employer benefits (health/pension type)</td><td>Dropdown</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--sim-deep);">目標</span><span class="cat-name">Goals &amp; preferences</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Financial goal + target amount/date</td><td>Form</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Housing plans (buy/rent, timeline)</td><td>Form</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Risk tolerance / life-event plans</td><td>Quiz</td><td>Very low</td><td class="col-status"><span class="badge-clear">clear</span><span class="grey-note">Collecting this is fine. Turning it into a specific product recommendation is what pulls you into Tier 2 suitability territory — keep output generic/educational.</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--psy-deep);">心理</span><span class="cat-name">Psychology &amp; behavior</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Money-personality quiz answers</td><td>Multiple choice</td><td>Very low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Free-text reflection ("what worries you about money?")</td><td>Chat / text field</td><td>Low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Mood / check-in log over time</td><td>Quick-tap scale</td><td>Very low</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <div class="input-group">
+      <div class="cat-head"><span class="cat-kanji" style="color:var(--adv-deep);">書類</span><span class="cat-name">Other documents</span></div>
+      <table class="input-table">
+        <tr><th>Input</th><th>Collection method</th><th>Friction</th><th>Status</th></tr>
+        <tr><td class="col-input">Final tax return (確定申告)</td><td>Upload → OCR</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Pension statement (ねんきん定期便)</td><td>Upload → OCR</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+        <tr><td class="col-input">Rent / mortgage contract terms</td><td>Typed or upload</td><td>Medium</td><td class="col-status"><span class="badge-clear">clear</span></td></tr>
+      </table>
+    </div>
+
+    <h3 style="font-family:'Shippori Mincho',serif;font-size:19px;margin:8px 0 14px;">Making Tier 0 input feel effortless</h3>
+    <div class="strategy-list">
+      <div class="s-card"><h5>Camera before keyboard</h5><p>Anywhere a physical document exists — payslip, receipt, policy — default to the camera. OCR does the typing; the user just confirms.</p></div>
+      <div class="s-card"><h5>Chat, not forms</h5><p>One question at a time in a conversational flow reads as a text exchange, not paperwork — the same total data, far less perceived friction.</p></div>
+      <div class="s-card"><h5>Estimates over exactness</h5><p>Sliders and "roughly" toggles for numbers where precision doesn't matter yet. You can always refine later; don't demand precision up front.</p></div>
+      <div class="s-card"><h5>Progressive profiling</h5><p>Ask the minimum to deliver first value. Unlock deeper questions as engagement and trust build, not all at signup.</p></div>
+      <div class="s-card"><h5>OCR-then-confirm</h5><p>Extract everything you can from a photo automatically, then let the user tap "looks right" instead of retyping it.</p></div>
+      <div class="s-card"><h5>Ask once, remember always</h5><p>Never re-ask something already given. Surface it for editing only when the user chooses to update it.</p></div>
+      <div class="s-card"><h5>Tap over type</h5><p>Icon-based category taps, emoji mood scales, and preset chips beat free text wherever the answer set is finite.</p></div>
+      <div class="s-card"><h5>Explain the "why"</h5><p>A one-line reason before each ask ("so we can show your rough tax bracket") measurably lowers drop-off versus an unexplained field.</p></div>
+    </div>
+
+    <h3 style="font-family:'Shippori Mincho',serif;font-size:19px;margin:8px 0 14px;">Tech needed to parse, analyze, and service on Tier 0 data</h3>
+    <div class="tech-tags">
+      <span class="tag">Japanese-capable OCR<small>Google Cloud Vision or equivalent — generic Latin-only OCR engines undersupport kanji/kana receipt &amp; payslip formats</small></span>
+      <span class="tag">Document/PDF parsing<small>Template matching for known formats (payslips, 源泉徴収票) + OCR fallback for the long tail</small></span>
+      <span class="tag">NLP entity extraction<small>Pull structured amounts, dates, categories out of free text and OCR output</small></span>
+      <span class="tag">Categorization engine<small>Rule-based keyword matching to start; ML classifier once you have enough labeled volume</small></span>
+      <span class="tag">Input validation<small>Sanity-check typed figures (e.g. spending exceeding stated income) to catch typos, not fraud-detect</small></span>
+      <span class="tag">Encrypted storage<small>PII/financial data at rest — an APPI (personal data protection) obligation independent of banking-license tier</small></span>
+      <span class="tag">Cohort aggregation layer<small>Buckets users into anonymized peer groups for benchmarking without exposing individual data</small></span>
+      <span class="tag">Simulation engine<small>Pure-math scenario modeling on user-entered numbers — stays informational as long as output is general, not a specific product recommendation</small></span>
+      <span class="tag">Nudge/reminder scheduler<small>Generic, pattern-based prompts ("many people review coverage yearly") — not personalized suitability advice</small></span>
+    </div>
+
+    <h3 style="font-family:'Shippori Mincho',serif;font-size:19px;margin:8px 0 14px;">For contrast — examples of Tier 1, not available yet</h3>
+    <div class="tier1-grid">
+      <div class="tier1-card"><div class="lock">🔒 tier 1</div><h5>Live bank balance, auto-updating</h5><p>No manual entry — the app polls the account itself. Requires Electronic Settlement Agency (FSIBO) registration.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 1</div><h5>Automatic transaction feed</h5><p>Every purchase categorized the moment it posts, with no photo or typing from the user.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 1</div><h5>Real-time consolidated net worth</h5><p>Multiple linked accounts summed live, rather than a snapshot the user typed in themselves.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 1</div><h5>Auto-detected wasteful subscriptions</h5><p>Flagged directly from a live transaction stream, not from a list the user declared.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 1</div><h5>Direct credit bureau pull</h5><p>Fetching a real score from CIC/JICC rather than the user self-reporting their cards.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 1+</div><h5>Initiating a transfer or cancellation</h5><p>Taking any action on the user's behalf — payment initiation is its own regulated category (PISP), separate from just reading data.</p></div>
+      <div class="tier1-card"><div class="lock">🔒 tier 2/3</div><h5>Personalized product recommendation</h5><p>"You specifically should buy fund X" crosses from informational simulation into investment advice / suitability territory.</p></div>
+    </div>
+
+  </div>
+
+  <div id="tab-revenue" style="display:none">
+
+    <p class="lede" style="margin-top:0;">Eight ways to get paid, branching off one root question: <strong>what are you actually charging for</strong> — the software, the assets, the match, or the money itself? Each branch carries its own regulatory dependency and its own path from launch to maturity.</p>
+
+    <svg class="rev-diagram" viewBox="0 0 1160 185" xmlns="http://www.w3.org/2000/svg">
+      <rect x="497" y="8" width="166" height="38" rx="2" fill="var(--card)" stroke="var(--grout)" stroke-width="1.5"/>
+      <text x="580" y="23" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--ink)">What are you</text>
+      <text x="580" y="37" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--ink)">charging for?</text>
+
+      <line x1="580" y1="46" x2="580" y2="70" stroke="var(--grout)" stroke-width="1.5"/>
+      <line x1="85" y1="70" x2="1079" y2="70" stroke="var(--grout)" stroke-width="1.5"/>
+
+      <!-- 1 subscription -->
+      <line x1="85" y1="70" x2="85" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="20" y="90" width="130" height="38" fill="var(--mat-tint)" stroke="var(--mat-deep)" stroke-width="1.5"/>
+      <text x="85" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">Subscription</text>
+      <text x="85" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">(flat/tiered)</text>
+      <text x="85" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--mat-deep)">Tier 0</text>
+
+      <!-- 2 AUM -->
+      <line x1="227" y1="70" x2="227" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="162" y="90" width="130" height="38" fill="var(--psy-tint)" stroke="var(--psy-deep)" stroke-width="1.5"/>
+      <text x="227" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--psy-deep)">AUM fee</text>
+      <text x="227" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--psy-deep)">(% of assets)</text>
+      <text x="227" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--psy-deep)">Tier 2/3</text>
+
+      <!-- 3 funnel -->
+      <line x1="369" y1="70" x2="369" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="304" y="90" width="130" height="38" fill="var(--adv-tint)" stroke="var(--adv-deep)" stroke-width="1.5"/>
+      <text x="369" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">Free → paid</text>
+      <text x="369" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">funnel</text>
+      <text x="369" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--adv-deep)">Tier 0 → 2/3</text>
+
+      <!-- 4 transaction cut -->
+      <line x1="511" y1="70" x2="511" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="446" y="90" width="130" height="38" fill="var(--mat-tint)" stroke="var(--mat-deep)" stroke-width="1.5"/>
+      <text x="511" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">Transaction /</text>
+      <text x="511" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">referral cut</text>
+      <text x="511" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--mat-deep)">Tier 0</text>
+
+      <!-- 5 placement -->
+      <line x1="653" y1="70" x2="653" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="588" y="90" width="130" height="38" fill="var(--mat-tint)" stroke="var(--mat-deep)" stroke-width="1.5"/>
+      <text x="653" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">Placement /</text>
+      <text x="653" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--mat-deep)">matching fee</text>
+      <text x="653" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--mat-deep)">Tier 0</text>
+
+      <!-- 6 b2b -->
+      <line x1="795" y1="70" x2="795" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="730" y="90" width="130" height="38" fill="var(--adv-tint)" stroke="var(--adv-deep)" stroke-width="1.5"/>
+      <text x="795" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">B2B /</text>
+      <text x="795" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">B2B2C</text>
+      <text x="795" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--adv-deep)">Tier 0 / 1</text>
+
+      <!-- 7 lending -->
+      <line x1="937" y1="70" x2="937" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="872" y="90" width="130" height="38" fill="var(--psy-tint)" stroke="var(--psy-deep)" stroke-width="1.5"/>
+      <text x="937" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--psy-deep)">Lending margin</text>
+      <text x="937" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--psy-deep)">(interest spread)</text>
+      <text x="937" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--psy-deep)">Tier 2+</text>
+
+      <!-- 8 card -->
+      <line x1="1079" y1="70" x2="1079" y2="90" stroke="var(--grout)" stroke-width="1.5"/>
+      <rect x="1014" y="90" width="130" height="38" fill="var(--adv-tint)" stroke="var(--adv-deep)" stroke-width="1.5"/>
+      <text x="1079" y="106" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">Card</text>
+      <text x="1079" y="119" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="10" fill="var(--adv-deep)">interchange</text>
+      <text x="1079" y="145" text-anchor="middle" font-family="Zen Kaku Gothic New" font-size="9.5" fill="var(--adv-deep)">Partner-dependent</text>
+    </svg>
+
+    <div class="rev-legend">
+      <span><i style="background:var(--mat-deep);"></i>Chargeable at Tier 0 — no license, start now</span>
+      <span><i style="background:var(--adv-deep);"></i>Mixed / partner- or path-dependent</span>
+      <span><i style="background:var(--psy-deep);"></i>Requires licensing before first yen — no lean MVP</span>
+    </div>
+
+    <div class="revmodel-card rm-sub" style="--rev-deep:var(--mat-deep);--rev-tint:var(--mat-tint);">
+      <div class="rm-head"><span class="rm-name">1. Direct Subscription</span><span class="rm-tier">tier 0 (usually)</span></div>
+      <div class="row"><dt>Definition</dt><dd>User pays a recurring flat or tiered fee for ongoing access to the product itself — no asset management, no marketplace cut sitting underneath it.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Tier 0 in almost every case here — you're charging for software and insight, not a financial service. Facet is the exception: its "subscription" is a wrapper around licensed human advisory, so it required Tier 2 registration from day one, not as an upgrade path.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Chargeable at MVP with zero registration, as long as the tool delivers standalone value without needing live account data to justify the price.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Freemium / free trial</span><span class="arrow">→</span>
+        <span class="step">Paid individual tier</span><span class="arrow">→</span>
+        <span class="step">Household / family tier</span><span class="arrow">→</span>
+        <span class="step">Employer benefit upsell (crosses into B2B)</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Monarch Money</span><span class="chip">Copilot Money</span><span class="chip">Qapital</span><span class="chip">Boldin</span><span class="chip">Cleo</span><span class="chip">Facet (exception)</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-aum" style="--rev-deep:var(--psy-deep);--rev-tint:var(--psy-tint);">
+      <div class="rm-head"><span class="rm-name">2. AUM Fee</span><span class="rm-tier">tier 2/3 from day one</span></div>
+      <div class="row"><dt>Definition</dt><dd>A percentage of the money you manage, typically ~0.5–1%/year.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Requires investment-advisory or investment-management registration before you can legally touch a single yen. There is no "start free, add AUM fees later" path within this model alone — you either launch fully licensed, or this model doesn't exist for you yet.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Not startable at Tier 0. This is the model that forces capital-raising and compliance work before anything is monetizable.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Full license secured</span><span class="arrow">→</span>
+        <span class="step">Launch fully licensed (no MVP shortcut)</span><span class="arrow">→</span>
+        <span class="step">Scale via distribution — bank white-labeling or brand</span><span class="arrow">→</span>
+        <span class="step">Absorption into a bank's distribution (majority stake)</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">WealthNavi</span><span class="chip">THEO / Money Design</span><span class="chip">Ellevest</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-funnel" style="--rev-deep:var(--adv-deep);--rev-tint:var(--adv-tint);">
+      <div class="rm-head"><span class="rm-name">3. Free Tool → Funnel to a Licensed Service</span><span class="rm-tier">tier 0 + tier 2/3</span></div>
+      <div class="row"><dt>Definition</dt><dd>A genuinely free (not just a free trial) product that builds trust and a large user base, monetized entirely downstream by converting a fraction of users into a paid, licensed offering.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>The free layer is Tier 0. The paid layer is whatever tier the eventual service requires — usually Tier 2/3 for advisory. You need both halves built or partnered; the free tool alone never monetizes on its own.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Launch the free half immediately. The monetizing half has to exist — built in-house or via partnership — before the funnel produces any revenue.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Free dashboard (Tier 0)</span><span class="arrow">→</span>
+        <span class="step">User crosses an asset/engagement threshold</span><span class="arrow">→</span>
+        <span class="step">Warm handoff to fee-based advisory (Tier 2/3)</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Empower (Personal Capital)</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-txn" style="--rev-deep:var(--mat-deep);--rev-tint:var(--mat-tint);">
+      <div class="rm-head"><span class="rm-name">4. Transaction / Referral Cut</span><span class="rm-tier">tier 0</span></div>
+      <div class="row"><dt>Definition</dt><dd>You get paid by the party on the other side of a match — a card issuer, lender, or insurer — when a user takes an action through you.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Two distinct sub-paths from the same Tier 0 start. (a) Pure media/affiliate: a comparison-content company, no financial license ever required. (b) Licensed marketplace: you become the actual broker of record, which does require a license (e.g. an insurance agency license) even though you never touch investment-advisory tiers.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Tier 0 either way at launch — the fork only matters once you decide whether to capture full brokerage economics or stay pure-media.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Comparison content (Tier 0)</span><span class="arrow">→</span>
+        <span class="step">Stay media/affiliate at scale</span><span class="step" style="border-color:transparent;">or</span>
+        <span class="step">Become the licensed broker to capture full commission</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">NerdWallet</span><span class="chip">LendingTree</span><span class="chip">Policygenius (became licensed)</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-placement" style="--rev-deep:var(--mat-deep);--rev-tint:var(--mat-tint);">
+      <div class="rm-head"><span class="rm-name">5. Placement / Matching Fee</span><span class="rm-tier">tier 0</span></div>
+      <div class="row"><dt>Definition</dt><dd>A fee for successfully matching a user to a human professional — a CPA, advisor, or lawyer. You're never the licensed party; the professional is.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Tier 0 the entire way — you're a marketplace/directory, not a provider of the regulated service itself.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Fully chargeable at MVP.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Free/low-friction matching (Tier 0)</span><span class="arrow">→</span>
+        <span class="step">Paid placement fee per successful match</span><span class="arrow">→</span>
+        <span class="step">Optional in-house professional arm (new, separately-licensed line)</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Harness Wealth</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-b2b" style="--rev-deep:var(--adv-deep);--rev-tint:var(--adv-tint);">
+      <div class="rm-head"><span class="rm-name">6. B2B / B2B2C</span><span class="rm-tier">tier 0 or tier 1</span></div>
+      <div class="row"><dt>Definition</dt><dd>The paying customer is an institution — an employer, or another fintech — not the end consumer.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Varies by sub-type. Selling content/tools to employers as a benefit stays Tier 0 — the real bottleneck is the enterprise sales cycle, not regulation. Selling your data-aggregation infrastructure to other fintechs requires Tier 1 registration, because you're the one actually touching live account data at scale.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>The employer-benefit sub-path is chargeable immediately; the infrastructure-API sub-path needs Tier 1 registration in place before you can sell it.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Consumer Tier 0 app builds usage data</span><span class="arrow">→</span>
+        <span class="step">Pivot/expand to employer benefit or B2B API</span><span class="arrow">→</span>
+        <span class="step">B2B revenue eclipses original consumer product</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Origin</span><span class="chip">Moneytree</span><span class="chip">Money Forward</span><span class="chip">freee</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-lending" style="--rev-deep:var(--psy-deep);--rev-tint:var(--psy-tint);">
+      <div class="rm-head"><span class="rm-name">7. Lending Margin (Interest Spread)</span><span class="rm-tier">tier 2+ from day one</span></div>
+      <div class="row"><dt>Definition</dt><dd>You lend money — directly, or via your own credit line — and earn the spread between what you charge borrowers and your own cost of capital.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>Requires Money Lending Business registration (or equivalent) before you can extend a single yen of credit — arguably the heaviest capital-plus-compliance load of any model here, since you also need real balance-sheet capital to lend, not just a license.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Not startable at Tier 0, and not really startable lean at all. This model wants venture debt or balance-sheet capital behind it from day one.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">There isn't a "start light, add later" path</span><span class="arrow">→</span>
+        <span class="step">Tally tried the closest version and it's part of why it shut down in 2024</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Tally (cautionary — shut down)</span><span class="chip">Oportun (Digit's acquirer)</span>
+      </dd></div>
+    </div>
+
+    <div class="revmodel-card rm-card" style="--rev-deep:var(--adv-deep);--rev-tint:var(--adv-tint);">
+      <div class="rm-head"><span class="rm-name">8. Card / Interchange</span><span class="rm-tier">partner-dependent</span></div>
+      <div class="row"><dt>Definition</dt><dd>You issue a debit or prepaid card, via a banking-as-a-service partner, and earn a small cut of each transaction's interchange fee.</dd></div>
+      <div class="row"><dt>Regulatory dependency</dt><dd>You typically don't need to hold a banking license yourself — a partner bank or BaaS provider holds the license and issues the card under their charter — but you do need a real card-issuing partnership agreement, with its own long lead time and diligence bar.</dd></div>
+      <div class="row"><dt>Start here</dt><dd>Not a pure Tier 0 launch, but lighter than becoming a lender yourself — a partnership dependency rather than a registration one.</dd></div>
+      <div class="row"><dt>Maturation path</dt><dd class="path-chain">
+        <span class="step">Core app builds engagement (Tier 0)</span><span class="arrow">→</span>
+        <span class="step">Card partnership negotiated</span><span class="arrow">→</span>
+        <span class="step">Card launches as a secondary revenue layer</span>
+      </dd></div>
+      <div class="row"><dt>Case studies</dt><dd class="case-chips">
+        <span class="chip">Qapital</span><span class="chip">Cleo</span>
+      </dd></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>24 atomic services · 23 companies mapped · 8 revenue models</span>
+    <span>funding figures and status current as of research — reverify before citing to investors, several have moved fast (Tally, Digit, Zeta, WealthNavi all changed status within the past 18 months) · Tier 0 input map is a product-design read, not a compliance sign-off</span>
+  </footer>
+
+</div>
+
+<script>
+function showTab(name, btn){
+  document.getElementById('tab-mosaic').style.display = (name === 'mosaic') ? '' : 'none';
+  document.getElementById('tab-competitors').style.display = (name === 'competitors') ? '' : 'none';
+  document.getElementById('tab-inputs').style.display = (name === 'inputs') ? '' : 'none';
+  document.getElementById('tab-revenue').style.display = (name === 'revenue') ? '' : 'none';
+  document.querySelectorAll('nav.tabs button').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
